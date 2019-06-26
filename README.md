@@ -35,13 +35,13 @@ docker build . -t detectBuild
 
 Após executar o comando anterior com sucesso. Coloque suas imagens dentro da pasta "input_images" e inicie o programa.
 
-No linux via terminal execute:
+No linux pelo terminal execute:
 
 ```
 docker run -v $PWD:/app -it detectBuild
 ```
 
-No windows via terminal execute:
+No windows pelo terminal execute:
 
 ```
 docker run -v %cd%:/app -it detectBuild
