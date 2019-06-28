@@ -12,8 +12,7 @@ PATH_TO_TMP = os.path.join(
 )
 
 class Preprocessing:
-     """Set of functions that are performed before prediction."""
-
+    """Set of functions that are performed before prediction."""
     def create_tiles(self, image_path, SIZE=(300, 300)):
         """Predict buildings in a batch of images.
 

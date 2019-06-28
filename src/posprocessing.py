@@ -52,10 +52,12 @@ class Posprocessing:
         """Defines height, width, and image source coordinates."""
         g = gdal.Open(image_path) 
         geoTransform = g.GetGeoTransform()
+        self.dimension_x = g.RasterXSize
+        self.dimension_y = g.RasterYSize
         minx = geoTransform[0]
         maxy = geoTransform[3]
-        maxx = minx + geoTransform[1] * g.RasterXSize
-        miny = maxy + geoTransform[5] * g.RasterYSize
+        maxx = minx + geoTransform[1] * self.dimension_x
+        miny = maxy + geoTransform[5] * self.dimension_y
         self.pixelWidth = abs(geoTransform[1])
         self.pixelHeight = abs(geoTransform[5])
         self.originx = minx
@@ -77,23 +79,28 @@ class Posprocessing:
             list of georeferenced coordinates.
         """
         ymin, xmin, ymax, xmax  = box
-        p1 = (
+        p1 = [
             originx + (self.pixelWidth*xmin*300 + self.pixelWidth/2) , 
             originy - (self.pixelHeight*ymax*300 + self.pixelHeight/2) 
-        )
-        p2 = (
+        ]
+        p2 = [
             originx + (self.pixelWidth*xmin*300 + self.pixelWidth/2) , 
             originy - (self.pixelHeight*ymin*300 + self.pixelHeight/2) 
-        )
-        p3 = (
+        ]
+        p3 = [
             originx + (self.pixelWidth*xmax*300 + self.pixelWidth/2) , 
             originy - (self.pixelHeight*ymin*300 + self.pixelHeight/2) 
-        )
-        p4 = (
+        ]
+        p4 = [
             originx + (self.pixelWidth*xmax*300 + self.pixelWidth/2) , 
             originy - (self.pixelHeight*ymax*300 + self.pixelHeight/2) 
-        )
+        ]
         coordinates =  [ p1, p2, p3, p4 ]
+        for point in coordinates:
+            if abs(point[0]) > self.dimension_x:
+                point[0] = self.dimension_x if point[0] > 0 else -self.dimension_x
+            if abs(point[1]) > self.dimension_y:
+                point[1] = self.dimension_y if point[1] > 0 else -self.dimension_y
         return coordinates
 
     def get_xy_origin(self, name):
