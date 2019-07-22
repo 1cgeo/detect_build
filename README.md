@@ -28,7 +28,7 @@ e extraia os arquivos.
 Com o [Docker](https://docs.docker.com/install/) instalado e os arquivos, salvos em um local de sua preferência, dentro da pasta "detect_build" execute o seguinte comando pelo terminal (No Linux ou Windows):
 
 ```
-docker build . -t detectBuild
+docker build . -t detectbuild
 ```
 
 ## Executando
@@ -38,13 +38,13 @@ Após executar o comando anterior com sucesso. Coloque suas imagens dentro da pa
 No linux pelo terminal execute:
 
 ```
-docker run -v $PWD:/app -it detectBuild
+docker run -v $PWD:/app -it detectbuild
 ```
 
 No windows pelo terminal execute:
 
 ```
-docker run -v %cd%:/app -it detectBuild
+docker run -v %cd%:/app -it detectbuild
 ```
 
 No final do processo será gerado um arquivo Geopackage na pasta "output_gpkg" contendo os boxes da identificação.
