@@ -52,16 +52,14 @@ class Posprocessing:
         """Defines height, width, and image source coordinates."""
         g = gdal.Open(image_path) 
         geoTransform = g.GetGeoTransform()
-        self.dimension_x = g.RasterXSize
-        self.dimension_y = g.RasterYSize
         minx = geoTransform[0]
         maxy = geoTransform[3]
-        maxx = minx + geoTransform[1] * self.dimension_x
-        miny = maxy + geoTransform[5] * self.dimension_y
         self.pixelWidth = abs(geoTransform[1])
         self.pixelHeight = abs(geoTransform[5])
         self.originx = minx
         self.originy = maxy
+        self.limit_x = minx + g.RasterXSize
+        self.limit_y = maxy - g.RasterYSize
 
     def pixel2coord(self, originx, originy, box):
         """Converts the coordinates of the pixels to the georeferenced coordinates.
@@ -97,13 +95,13 @@ class Posprocessing:
         ]
         coordinates =  [ p1, p2, p3, p4 ]
         for point in coordinates:
-            if abs(point[0]) > self.dimension_x:
-                point[0] = self.dimension_x if point[0] > 0 else -self.dimension_x
-            if abs(point[1]) > self.dimension_y:
-                point[1] = self.dimension_y if point[1] > 0 else -self.dimension_y
+            if point[0] > self.limit_x:
+                point[0] = self.limit_x
+            if point[1] < self.limit_y:
+                point[1] = self.limit_x
         return coordinates
 
-    def get_xy_origin(self, name):
+    def get_xy_origin(self, count, image_path):
         """extracts the source coordinates of a name with a format containing the coordinates.
 
         Parameters
@@ -112,10 +110,15 @@ class Posprocessing:
             name with the source coordinates.
         
         """
-        x1 = int(name.split('.')[0].split('_')[0])
-        y1 = int(name.split('.')[0].split('_')[2])
-        originx = self.originx + x1*self.pixelWidth
-        originy = self.originy - y1*self.pixelHeight
+        if count == 1:
+            originx = self.originx 
+            originy = self.originy
+        else:
+            name = image_path.split('/')[-1]
+            x1 = int(name.split('.')[0].split('_')[0])
+            y1 = int(name.split('.')[0].split('_')[2])
+            originx = self.originx + x1*self.pixelWidth
+            originy = self.originy - y1*self.pixelHeight
         return originx, originy
 
     def run(self, boxes, scores, batch_path):
@@ -138,12 +141,7 @@ class Posprocessing:
             for idx in range(scores[i].shape[0]):
                 score = scores[i][idx] 
                 if score > 0.74:
-                    if count == 1:
-                        originx = self.originx 
-                        originy = self.originy
-                    else:
-                        name = batch_path[i].split('/')[-1]
-                        originx, originy = self.get_xy_origin(name)
+                    originx, originy = self.get_xy_origin(count, batch_path[i])
                     coordinates = self.pixel2coord(
                         originx, 
                         originy, 
